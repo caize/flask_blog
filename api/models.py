@@ -1,4 +1,7 @@
 from . import db,ma
+from sqlalchemy.sql.sqltypes import TIMESTAMP
+from sqlalchemy.sql import func
+import datetime
 class Menu(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80))
@@ -33,3 +36,24 @@ class Link(db.Model):
 class LinkSchema(ma.Schema):
     class Meta:
         fields = ('id','title','desc','img','url')
+
+class Tag(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50))
+    add_at = db.Column(TIMESTAMP, server_default=func.now())
+    def __init__(self, name, add_at):
+        self.name = name
+        self.add_at = add_at
+
+class TagSchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'name', 'add_at')
+
+class Daily(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date, server_default=func.now())
+    text = db.Column(db.Text)
+
+class DailySchema(ma.Schema):
+    class Meta:
+        fields = ('id','date','text')

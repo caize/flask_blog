@@ -10,7 +10,7 @@ from datetime import timedelta
 def error(code, msg):
   return make_response(jsonify({"error":msg}), code)
 
-def success(data):
+def success(data = []):
   return make_response(jsonify({"error":'',"data":data}), 200)
 
 #token 验证

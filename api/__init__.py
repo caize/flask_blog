@@ -14,6 +14,6 @@ db = SQLAlchemy(app)
 ma = Marshmallow(app)
 cache = Cache(app)
 cache.init_app(app)
-cors = CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app)
 
 from api import models,views,controllers
