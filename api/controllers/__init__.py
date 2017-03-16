@@ -1,1 +1,1 @@
-from . import MenuController,LinkController
+from . import MenuController,LinkController,AdminController
