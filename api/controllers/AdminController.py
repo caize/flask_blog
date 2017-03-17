@@ -1,5 +1,5 @@
 from api import app
-from api.models import Menu,MenuSchema
+from api.models import Menu,MenuSchema,LinkSchema,Link
 from flask import jsonify,request,abort
 from api.views import admin_api, error, success
 
@@ -20,4 +20,11 @@ def admin_menu():
 def show_one_menu(id):
   schema = MenuSchema()
   res = schema.dump(Menu.query.filter_by(id=id).first())
+  return success(res.data)
+
+@app.route('/admin/link')
+@admin_api
+def admin_link():
+  schema = LinkSchema(many=True)
+  res = schema.dump(Link.query.all())
   return success(res.data)
