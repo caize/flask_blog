@@ -4,7 +4,7 @@ from sqlalchemy.sql import func
 import datetime
 class Menu(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80))
+    name = db.Column(db.String(80), unique=True)
     pid = db.Column(db.Integer, default=0)
 
     def __init__(self, name, pid):
@@ -28,10 +28,10 @@ class OauthSchema(ma.Schema):
 
 class Link(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(40))
+    title = db.Column(db.String(40), unique=True)
     desc = db.Column(db.String(100))
     img = db.Column(db.String(200), default=None)
-    url = db.Column(db.String(100))
+    url = db.Column(db.String(100), unique=True)
 
 class LinkSchema(ma.Schema):
     class Meta:

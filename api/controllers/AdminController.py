@@ -1,30 +1,15 @@
-from api import app
-from api.models import Menu,MenuSchema,LinkSchema,Link
-from flask import jsonify,request,abort
+from api import photos,app
+from flask import request
+from api.func import md5
 from api.views import admin_api, error, success
+import datetime
 
-
-@app.route('/admin/menu')
+@app.route('/up-img',methods=['POST'])
 @admin_api
-def admin_menu():
-  schema = MenuSchema(many=True)
-  res = schema.dump(Menu.query.filter_by(pid=0).all())
-  r_menu = res.data
-  for s in r_menu:
-    sub = schema.dump(Menu.query.filter_by(pid=s['id']).all())
-    s['sub'] = sub.data
-  return success(r_menu)
-
-@app.route('/admin/menu/<int:id>')
-@admin_api
-def show_one_menu(id):
-  schema = MenuSchema()
-  res = schema.dump(Menu.query.filter_by(id=id).first())
-  return success(res.data)
-
-@app.route('/admin/link')
-@admin_api
-def admin_link():
-  schema = LinkSchema(many=True)
-  res = schema.dump(Link.query.all())
-  return success(res.data)
+def upload():
+  if request.method == "POST" and 'pic' in request.files:
+    filename = photos.save(request.files['pic'],name=datetime.datetime.now().strftime('%Y%m%d%H%M%S')+'.')
+    file_url = photos.url(filename)
+    return success({"url":file_url})
+  else:
+    return error(500,'has some error')

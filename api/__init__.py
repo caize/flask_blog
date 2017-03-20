@@ -3,9 +3,17 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow  import Marshmallow
 from flask_cors import CORS,cross_origin
 from flask_cache  import Cache
-import pymysql
+from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
+import pymysql,os
 
 app = Flask(__name__, instance_relative_config=True)
+# app.config['UPLOADED_PHOTOS_DEST'] = os.getcwd()+'/static'
+app.config['UPLOADED_PHOTO_DEST'] = './static'
+app.config['UPLOADED_PHOTO_ALLOW'] = IMAGES
+
+photos = UploadSet('PHOTO')
+configure_uploads(app, photos)
+# patch_request_class(app)
 
 app.config.from_object('config')
 app.config.from_pyfile('config.py')
