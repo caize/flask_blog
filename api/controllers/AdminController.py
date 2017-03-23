@@ -1,8 +1,9 @@
 from api import photos,app
-from flask import request
+from flask import request,url_for,render_template
 from api.func import md5
 from api.views import admin_api, error, success
 import datetime
+
 
 @app.route('/up-img',methods=['POST'])
 @admin_api

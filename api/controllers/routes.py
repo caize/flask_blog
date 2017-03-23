@@ -1,4 +1,4 @@
-from .Controller import MenuAPI,LinkAPI,TagAPI
+from .Controller import MenuAPI,LinkAPI,TagAPI,PostsAPI
 from api import app
 
 def add_api(api_name, api_class, url, pk='id', pk_type='int'):
@@ -12,3 +12,5 @@ add_api('admin_menu', MenuAPI, '/admin/menu')
 add_api('admin_link', LinkAPI, '/admin/link')
 
 add_api('admin_tag', TagAPI, '/admin/tag')
+
+add_api('admin_posts', PostsAPI, '/admin/posts')

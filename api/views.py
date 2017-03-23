@@ -2,7 +2,7 @@ from . import app
 from .func import md5
 from .models import Oauth
 from . import admin_pass
-from flask import jsonify,request,abort,make_response
+from flask import jsonify,request,abort,make_response,render_template
 from . import cache
 import time,functools,six
 from datetime import timedelta

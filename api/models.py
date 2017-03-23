@@ -2,11 +2,26 @@ from . import db,ma
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql import func
 import datetime
+
+class Posts(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(250))
+    desc = db.Column(db.Text)
+    content = db.Column(db.Text)
+    push_at = db.Column(db.String(50))
+    click_num = db.Column(db.Integer,default=10)
+    menu_id = db.Column(db.Integer)
+    tags = db.Column(db.String(100))
+
+class PostsSchema(ma.Schema):
+    class Meta:
+        fields = ('id','title','desc','content','push_at','click_num','menu_id','tags')
+
+
 class Menu(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True)
     pid = db.Column(db.Integer, default=0)
-
     def __init__(self, name, pid):
         self.name = name
         self.pid = pid

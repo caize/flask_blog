@@ -1,6 +1,6 @@
 from flask.views import MethodView
 from api import app,db
-from api.models import Menu,MenuSchema,LinkSchema,Link,Tag, TagSchema
+from api.models import Menu,MenuSchema,LinkSchema,Link,Tag, TagSchema, PostsSchema, Posts
 from flask import jsonify,request,abort
 from api.views import admin_api, error, success
 from sqlalchemy import or_
@@ -125,6 +125,67 @@ class TagAPI(MethodView):
         db.session.add(Tag(name=name,add_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
         db.session.commit()
     return success()
+
+  def put(self, id):
+    pass
+
+  def delete(self, id):
+    pass
+
+#posts 
+class PostsAPI(MethodView):
+  decorators = [admin_api]
+
+  def get(self, id):
+    if id is not None:
+      schema = PostsSchema()
+      menu_schema = MenuSchema()
+      tag_schema = TagSchema(many=True)
+      ret = schema.dump(Posts.query.get(id))
+      info = ret.data
+      if info is not None and len(info) > 0:
+        info['menu'] = menu_schema.dump(Menu.query.get(info['menu_id'])).data
+        info['tagList'] = tag_schema.dump(Tag.query.filter(Tag.id.in_(list(info['tags']))).all()).data
+      return success(ret.data)
+    else:
+      menu_id = request.query.get('menu_id')
+      if menu_id is None:
+        schema = PostsSchema(many=True)
+        menu_schema = MenuSchema()
+        tag_schema = TagSchema(many=True)
+        lists = schema.dump(Posts.query.order_by('push_at desc').limit(9).all()).data
+        for i in lists:
+          i['menu'] = menu_schema.dump(Menu.query.get(i['menu_id'])).data
+          i['tagList'] = tag_schema.dump(Tag.query.filter(Tag.id.in_(list(i['tags']))).all()).data
+        return success(lists)
+      else:
+        schema = PostsSchema(many=True)
+        menu_schema = MenuSchema()
+        tag_schema = TagSchema(many=True)
+        lists = schema.dump(Posts.query.filter(Posts.menu_id==menu_id).order_by('push_at desc').limit(9).all()).data
+        for i in lists:
+          i['menu'] = menu_schema.dump(Menu.query.get(i['menu_id'])).data
+          i['tagList'] = tag_schema.dump(Tag.query.filter(Tag.id.in_(i['tags'].split(','))).all()).data
+        return success(lists)
+
+  def post(self):
+    menu_id = request.json.get('menu_id')
+    title = request.json.get('title')
+    tags = request.json.get('selectedTagIds')
+    desc = request.json.get('desc')
+    content = request.json.get('content')
+    push_at = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    schema = PostsSchema()
+    s = ''
+    l = 0
+    while l < len(tags):
+      s += str(tags[l])+','
+      l += 1
+    if menu_id and title and tags and desc and content:
+      db.session.add(Posts(menu_id=menu_id, title=title, desc=desc, content=content, push_at=push_at,tags=s))
+      db.session.commit()
+    return success()
+    
 
   def put(self, id):
     pass
