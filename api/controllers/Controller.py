@@ -145,10 +145,11 @@ class PostsAPI(MethodView):
       info = ret.data
       if info is not None and len(info) > 0:
         info['menu'] = menu_schema.dump(Menu.query.get(info['menu_id'])).data
-        info['tagList'] = tag_schema.dump(Tag.query.filter(Tag.id.in_(list(info['tags']))).all()).data
+        info['selectedTags'] = tag_schema.dump(Tag.query.filter(Tag.id.in_(info['tags'].split(','))).all()).data
+        info['selectedTagIds'] = str(info['tags'])[:-1].split(',')
       return success(ret.data)
     else:
-      menu_id = request.query.get('menu_id')
+      menu_id = request.args.get('menu_id')
       if menu_id is None:
         schema = PostsSchema(many=True)
         menu_schema = MenuSchema()
@@ -162,7 +163,7 @@ class PostsAPI(MethodView):
         schema = PostsSchema(many=True)
         menu_schema = MenuSchema()
         tag_schema = TagSchema(many=True)
-        lists = schema.dump(Posts.query.filter(Posts.menu_id==menu_id).order_by('push_at desc').limit(9).all()).data
+        lists = schema.dump(Posts.query.filter(Posts.menu_id==menu_id).order_by('push_at desc').all()).data
         for i in lists:
           i['menu'] = menu_schema.dump(Menu.query.get(i['menu_id'])).data
           i['tagList'] = tag_schema.dump(Tag.query.filter(Tag.id.in_(i['tags'].split(','))).all()).data
@@ -174,6 +175,7 @@ class PostsAPI(MethodView):
     tags = request.json.get('selectedTagIds')
     desc = request.json.get('desc')
     content = request.json.get('content')
+    img_url = request.json.get('img_url')
     push_at = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     schema = PostsSchema()
     s = ''
@@ -182,13 +184,36 @@ class PostsAPI(MethodView):
       s += str(tags[l])+','
       l += 1
     if menu_id and title and tags and desc and content:
-      db.session.add(Posts(menu_id=menu_id, title=title, desc=desc, content=content, push_at=push_at,tags=s))
+      db.session.add(Posts(menu_id=menu_id, title=title, desc=desc, content=content, push_at=push_at,tags=s, img_url=img_url))
       db.session.commit()
     return success()
     
 
   def put(self, id):
-    pass
+    menu_id = request.json.get('menu_id')
+    title = request.json.get('title')
+    tags = request.json.get('selectedTagIds')
+    desc = request.json.get('desc')
+    content = request.json.get('content')
+    img_url = request.json.get('img_url')
+    s = ''
+    l = 0
+    while l < len(tags):
+      s += str(tags[l])+','
+      l += 1
+    if menu_id and title and tags and desc and content:
+      fo = Posts.query.get(id)
+      fo.menu_id=menu_id
+      fo.title=title
+      fo.desc=desc
+      fo.content=content
+      fo.tags=s
+      fo.img_url=img_url
+      db.session.commit()
+    return success()
 
   def delete(self, id):
-    pass
+    link = Posts.query.get(id)
+    db.session.delete(link)
+    db.session.commit()
+    return success()

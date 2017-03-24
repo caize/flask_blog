@@ -39,13 +39,16 @@ def get_posts(id=None):
     schema = PostsSchema()
     menu_schema = MenuSchema()
     tag_schema = TagSchema(many=True)
-    ret = schema.dump(Posts.query.get(id))
+    p = Posts.query.get(id)
+    ret = schema.dump(p)
     info = ret.data
     if info is not None and len(info) > 0:
       info['menu'] = menu_schema.dump(Menu.query.get(info['menu_id'])).data
       info['next'] = schema.dump(Posts.query.filter(Posts.id > id).first()).data
       info['prev'] = schema.dump(Posts.query.filter(Posts.id < id).order_by('id desc').first()).data
       info['tagList'] = tag_schema.dump(Tag.query.filter(Tag.id.in_(info['tags'].split(','))).all()).data
+    p.click_num = p.click_num + 1
+    db.session.commit()
     return success(info)
   elif top is None:
       menu_id = request.args.get('menu_id')

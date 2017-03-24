@@ -12,10 +12,11 @@ class Posts(db.Model):
     click_num = db.Column(db.Integer,default=10)
     menu_id = db.Column(db.Integer)
     tags = db.Column(db.String(100))
+    img_url = db.Column(db.String(100))
 
 class PostsSchema(ma.Schema):
     class Meta:
-        fields = ('id','title','desc','content','push_at','click_num','menu_id','tags')
+        fields = ('id','title','desc','content','push_at','click_num','menu_id','tags', 'img_url')
 
 
 class Menu(db.Model):

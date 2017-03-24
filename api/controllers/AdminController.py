@@ -10,7 +10,6 @@ import datetime
 def upload():
   if request.method == "POST" and 'pic' in request.files:
     filename = photos.save(request.files['pic'],name=datetime.datetime.now().strftime('%Y%m%d%H%M%S')+'.')
-    file_url = photos.url(filename)
-    return success({"url":file_url})
+    return success({"url":filename})
   else:
     return error(500,'has some error')
