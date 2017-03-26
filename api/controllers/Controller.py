@@ -1,6 +1,6 @@
 from flask.views import MethodView
 from api import app,db
-from api.models import Menu,MenuSchema,LinkSchema,Link,Tag, TagSchema, PostsSchema, Posts
+from api.models import Menu,MenuSchema,LinkSchema,Link,Tag, TagSchema, PostsSchema, Posts, Daily, DailySchema
 from flask import jsonify,request,abort
 from api.views import admin_api, error, success
 from sqlalchemy import or_
@@ -214,6 +214,41 @@ class PostsAPI(MethodView):
 
   def delete(self, id):
     link = Posts.query.get(id)
+    db.session.delete(link)
+    db.session.commit()
+    return success()
+
+
+class DailyAPI(MethodView):
+  decorators = [admin_api]
+
+  def get(self, id):
+    if id is not None:
+      schema = DailySchema()
+      res = schema.dump(Daily.query.get(id))
+      return success(res.data)
+    else:
+      schema = DailySchema(many=True)
+      res = schema.dump(Daily.query.order_by('date desc').all())
+      return success(res.data)
+
+  def post(self):
+    text = request.json.get('text')
+    if text is not None:
+      db.session.add(Daily(text=text, date=datetime.datetime.now().strftime('%Y-%m-%d')))
+      db.session.commit()
+    return success()
+
+  def put(self, id):
+    text = request.json.get('text')
+    if text is not None:
+      info = Daily.query.get(id)
+      info.text = text
+      db.session.commit()
+    return success()
+
+  def delete(self, id):
+    link = Daily.query.get(id)
     db.session.delete(link)
     db.session.commit()
     return success()
