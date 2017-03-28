@@ -25,6 +25,6 @@ ma = Marshmallow(app)
 cache = Cache(app)
 cache.init_app(app)
 CORS(app)
-admin_pass = '667bfb2d66fa79699ee2ace21d1863af'
+admin_pass = 'your admin pass md5'
 
 from api import models,views,controllers
