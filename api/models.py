@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from . import db,ma
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql import func
@@ -73,3 +74,15 @@ class Daily(db.Model):
 class DailySchema(ma.Schema):
     class Meta:
         fields = ('id','date','text')
+
+class Token(db.Model):
+    __tablename__ = 'token'
+    token = db.Column(db.String(100),primary_key=True)
+    time = db.Column(db.String(40))
+    def __init__(self, token, time):
+        self.token = token
+        self.time = time
+
+class TokenSchema(ma.Schema):
+    class Meta:
+        fields = ('token','time')

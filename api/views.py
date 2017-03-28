@@ -1,6 +1,7 @@
-from . import app
+# -*- coding: utf-8 -*-
+from . import app,db
 from .func import md5
-from .models import Oauth
+from .models import Oauth,Token,TokenSchema
 from . import admin_pass
 from flask import jsonify,request,abort,make_response,render_template
 from . import cache
@@ -42,8 +43,15 @@ def admin_api(fn):
       if oath is None:
         return error(401,"Invalid appid & secret")
       else:
-        if token is None or token != cache.get(appid):
+        if token is None:
           return error(401,'this token is not matching the appid')
+        else:
+          t = Token.query.filter_by(token=token).first()
+          if t is not None:
+            if float(t.time) < time.time():
+              return error(401,"Invalid token")
+          else:
+            return error(401,"Invalid token")
     return fn(*args, **kw)
   return wrapper
 
@@ -69,10 +77,20 @@ def createToken():
     if oath is None:
       return error(500,'Invalid appid & secret')
     else:
-      if cache.get(appid) is None:
-        token = md5("%s%s%s%s"%(ip,appid,secret,time.time()))
-        cache.set(appid,token,timeout=1800)
-        cache.set(token,appid,timeout=1800)
+      t = Token.query.first()
+      if t is not None:
+        if float(t.time) < time.time():
+          token = md5("%s%s%s%s"%(ip,appid,secret,time.time()))
+          t.token = token
+          t.time = time.time() + 3600
+          db.session.commit()
+        else:
+          token = md5("%s%s%s%s"%(ip,appid,secret,time.time()))
+          t.token = token
+          t.time = time.time() + 3600
+          db.session.commit()
       else:
-        token = cache.get(appid)
+        token = md5("%s%s%s%s"%(ip,appid,secret,time.time()))
+        db.session.add(Token(token=token,time=time.time() + 3600))
+        db.session.commit()
     return success({"token":token})

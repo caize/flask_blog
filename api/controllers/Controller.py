@@ -154,10 +154,10 @@ class PostsAPI(MethodView):
         schema = PostsSchema(many=True)
         menu_schema = MenuSchema()
         tag_schema = TagSchema(many=True)
-        lists = schema.dump(Posts.query.order_by('push_at desc').limit(9).all()).data
+        lists = schema.dump(Posts.query.order_by('push_at desc').all()).data
         for i in lists:
           i['menu'] = menu_schema.dump(Menu.query.get(i['menu_id'])).data
-          i['tagList'] = tag_schema.dump(Tag.query.filter(Tag.id.in_(list(i['tags']))).all()).data
+          i['tagList'] = tag_schema.dump(Tag.query.filter(Tag.id.in_(i['tags'].split(','))).all()).data
         return success(lists)
       else:
         schema = PostsSchema(many=True)
